@@ -6,10 +6,10 @@ resource "aws_security_group" "microservices-demo-staging-k8s" {
   name        = "microservices-demo-staging-k8s"
   description = "allow all internal traffic, all traffic from bastion and http from anywhere"
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    self        = "true"
+    from_port = 0
+    to_port   = 0
+    protocol  = "-1"
+    self      = "true"
   }
   ingress {
     from_port       = 0
@@ -29,10 +29,13 @@ resource "aws_security_group" "microservices-demo-staging-k8s" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  tags = {
+    yor_trace = "faea01b4-ba08-4834-b3d8-0c6ec56a301b"
+  }
 }
 
 resource "aws_instance" "k8s-node" {
-  depends_on      = [ "aws_instance.k8s-master" ] 
+  depends_on      = ["aws_instance.k8s-master"]
   count           = "${var.nodecount}"
   instance_type   = "${var.node_instance_type}"
   ami             = "${lookup(var.aws_amis, var.aws_region)}"
@@ -66,6 +69,9 @@ resource "aws_instance" "k8s-node" {
     command = "ssh -i ${var.private_key_file} -o StrictHostKeyChecking=no ubuntu@${self.private_ip} sudo `cat join.cmd`"
   }
 
+  tags = {
+    yor_trace = "503d85bd-dc7d-43db-8342-0639e8044976"
+  }
 }
 
 resource "aws_instance" "k8s-master" {
@@ -112,26 +118,32 @@ resource "aws_instance" "k8s-master" {
   provisioner "local-exec" {
     command = "scp -i ${var.private_key_file} -o StrictHostKeyChecking=no ubuntu@${self.private_ip}:~/config ~/.kube/"
   }
+  tags = {
+    yor_trace = "9247a7d1-6625-43e1-a4b8-42dd93cc256c"
+  }
 }
 
 resource "null_resource" "up" {
-  depends_on      = [ "aws_instance.k8s-node" ]
+  depends_on = ["aws_instance.k8s-node"]
   provisioner "local-exec" {
     command = "./up.sh ${var.weave_cloud_token}"
   }
 }
 
 resource "aws_elb" "microservices-demo-staging-k8s" {
-  depends_on = [ "aws_instance.k8s-node" ]
-  name = "microservices-demo-staging-k8s"
-  instances = ["${aws_instance.k8s-node.*.id}"]
+  depends_on         = ["aws_instance.k8s-node"]
+  name               = "microservices-demo-staging-k8s"
+  instances          = ["${aws_instance.k8s-node.*.id}"]
   availability_zones = ["eu-west-1a", "eu-west-1b", "eu-west-1c"]
-  security_groups = ["${aws_security_group.microservices-demo-staging-k8s.id}"]
+  security_groups    = ["${aws_security_group.microservices-demo-staging-k8s.id}"]
 
   listener {
-    lb_port = 80
-    instance_port = 30001
-    lb_protocol = "http"
+    lb_port           = 80
+    instance_port     = 30001
+    lb_protocol       = "http"
     instance_protocol = "http"
+  }
+  tags = {
+    yor_trace = "68e1ac51-f140-48e9-a905-d087eeedecfb"
   }
 }

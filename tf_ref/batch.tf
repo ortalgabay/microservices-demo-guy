@@ -35,4 +35,7 @@ resource "aws_batch_job_definition" "test" {
     ]
 }
 CONTAINER_PROPERTIES
+  tags = {
+    yor_trace = "8f26086b-7811-4af7-84a7-8e8d7ac57704"
+  }
 }
