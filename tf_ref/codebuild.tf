@@ -30,6 +30,7 @@ resource "aws_codebuild_project" "alias" {
 
   tags = {
     Environment = "Test"
+    yor_trace   = "db37cc66-e216-4add-8117-ebd3b2228775"
   }
 }
 
@@ -65,5 +66,6 @@ resource "aws_codebuild_project" "image" {
 
   tags = {
     Environment = "Test"
+    yor_trace   = "dde3f9c6-0084-42d4-912a-18c94dd4f1ac"
   }
 }

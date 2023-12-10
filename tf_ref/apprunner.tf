@@ -18,6 +18,7 @@ resource "aws_apprunner_service" "example" {
   }
 
   tags = {
-    Name = "example-apprunner-service"
+    Name      = "example-apprunner-service"
+    yor_trace = "de0803c1-6f7f-4546-90aa-2734f0f28c55"
   }
 }
